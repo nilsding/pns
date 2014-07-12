@@ -97,6 +97,10 @@ keyuphandler = (event) ->
       event.preventDefault()
       toaster.velY = 0
 
+collide = (a, b) ->
+  (Math.abs(a.posX - b.posX) * 2 < (a.width + b.width)) and 
+    (Math.abs(a.posY - b.posY) * 2 < (a.height + b.height))
+
 shootLaser = ->
   # create a new laser object
   laser = newObject 0, 0, 71, 71
@@ -148,6 +152,11 @@ gameLoop = ->
     newX = l.posX + l.velX
     if newX < gameField.width
       l.posX = newX
+      # collision detection!!!!
+      if collide(l, clock)
+        laserObjects.splice i, 1
+        clock.posX = 800
+        clock.posY = Math.floor (Math.random() * 1000) % (600 - clock.height)
     else
       laserObjects.splice i, 1
   
