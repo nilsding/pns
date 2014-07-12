@@ -18,6 +18,7 @@ gameVars =
 gameField =
   width: 800
   height: 600
+  background: new Image()
 
 title =
   opened: false
@@ -28,15 +29,18 @@ toaster = newObject 25, title.top.height - (188 / 2), 188, 148
 
 clock = newObject 600, 100, 200, 200
 
+laserImage = new Image()
 laserObjects = []
 
 init = ->
   canvas = document.getElementById 'gameField'
   ctx = canvas.getContext '2d'
+  gameField.background.src = './img/background.png'
   toaster.image.src = './img/toaster.png'
   clock.image.src = './img/clock.png'
   title.top.image.src = './img/title_top.png'
   title.bottom.image.src = './img/title_bottom.png'
+  laserImage.src = './img/laser.png'
   
   gameControlButton = document.getElementById 'gameControlButton'
   gameControlButton.innerHTML = "Start Game"
@@ -47,10 +51,11 @@ init = ->
   render()
 
 render = ->
-  ctx.clearRect(0, 0, gameField.width, gameField.height)
+  #ctx.clearRect(0, 0, gameField.width, gameField.height)
+  ctx.drawImage gameField.background, 0, 0, gameField.width, gameField.height
   
   for obj in laserObjects  # draw the laser first
-    ctx.drawImage obj.image, obj.posX, obj.posX, obj.width, obj.height
+    ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
   for obj in [clock, toaster, title.top, title.bottom]    # I'm a lazy fuck.
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
@@ -58,7 +63,6 @@ render = ->
   window.requestAnimationFrame render
 
 keydownhandler = (event) ->
-  console.log event.keyCode
   unless gameVars.isRunning
     switch event.keyCode
       when 32 # space bar  (title screen)
@@ -96,10 +100,10 @@ keyuphandler = (event) ->
 shootLaser = ->
   # create a new laser object
   laser = newObject 0, 0, 71, 71
-  laser.image.src = './img/laser.png'
+  laser.image = laserImage
   
-  laser.posX = toaster.posX + toaster.width - laser.width
-  laser.posY = toaster.posY + toaster.height / 2 - laser.height / 2
+  laser.posX = Math.floor(toaster.posX + toaster.width - laser.width)
+  laser.posY = Math.floor(toaster.posY + toaster.height / 2 - laser.height / 2)
   laser.velX = 5
   laser.velY = 0
   laserObjects.push laser
@@ -140,12 +144,12 @@ gameLoop = ->
     clock.posY = Math.floor (Math.random() * 1000) % (600 - clock.height)
   
   for l, i in laserObjects
+    continue unless l?
     newX = l.posX + l.velX
     if newX < gameField.width
       l.posX = newX
     else
       laserObjects.splice i, 1
-      puts laserObjects
   
   window.setTimeout gameLoop, 1000 / gameVars.ticks
 
