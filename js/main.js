@@ -38,7 +38,7 @@ title = {
 
 toaster = newObject(25, title.top.height - (188 / 2), 188, 148);
 
-clock = newObject(600, 100, 200, 200);
+clock = newObject(600, 100, 128, 128);
 
 laserImage = new Image();
 
@@ -123,7 +123,7 @@ keyuphandler = function(event) {
 };
 
 collide = function(a, b) {
-  return !((b.posX > a.posX + a.width) || (b.posX + b.width < a.posX) || (b.posY > a.posY + a.height) || (b.posY + b.height < b.posY));
+  return !((b.posX > a.posX + a.width) || (b.posX + b.width < a.posX) || (b.posY > a.posY + a.height) || (b.posY + b.height < a.posY));
 };
 
 shootLaser = function() {

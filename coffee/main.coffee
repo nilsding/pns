@@ -27,7 +27,7 @@ title =
 
 toaster = newObject 25, title.top.height - (188 / 2), 188, 148
 
-clock = newObject 600, 100, 200, 200
+clock = newObject 600, 100, 128, 128
 
 laserImage = new Image()
 laserObjects = []
@@ -100,7 +100,7 @@ keyuphandler = (event) ->
 collide = (a, b) -> not ((b.posX > a.posX + a.width) or
                          (b.posX + b.width < a.posX) or
                          (b.posY > a.posY + a.height) or
-                         (b.posY + b.height < b.posY))
+                         (b.posY + b.height < a.posY))
 
 shootLaser = ->
   # create a new laser object
