@@ -53,9 +53,6 @@ init = function() {
   title.top.image.src = './img/title_top.png';
   title.bottom.image.src = './img/title_bottom.png';
   laserImage.src = './img/laser.png';
-  gameControlButton = document.getElementById('gameControlButton');
-  gameControlButton.innerHTML = "Start Game";
-  gameControlButton.onclick = startGame;
   document.onkeydown = keydownhandler;
   document.onkeyup = keyuphandler;
   return render();
@@ -196,16 +193,12 @@ gameLoop = function() {
 };
 
 startGame = function() {
-  gameControlButton.innerHTML = "Stop Game";
-  gameControlButton.onclick = stopGame;
   openTitle();
   gameVars.isRunning = true;
   return gameLoop();
 };
 
 stopGame = function() {
-  gameControlButton.innerHTML = "Start Game";
-  gameControlButton.onclick = startGame;
   closeTitle();
   return gameVars.isRunning = false;
 };
