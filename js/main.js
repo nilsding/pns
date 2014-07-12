@@ -123,7 +123,7 @@ keyuphandler = function(event) {
 };
 
 collide = function(a, b) {
-  return (Math.abs(a.posX - b.posX) * 2 < (a.width + b.width)) && (Math.abs(a.posY - b.posY) * 2 < (a.height + b.height));
+  return !((b.posX > a.posX + a.width) || (b.posX + b.width < a.posX) || (b.posY > a.posY + a.height) || (b.posY + b.height < b.posY));
 };
 
 shootLaser = function() {

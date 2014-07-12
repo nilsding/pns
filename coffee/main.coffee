@@ -97,9 +97,10 @@ keyuphandler = (event) ->
       event.preventDefault()
       toaster.velY = 0
 
-collide = (a, b) ->
-  (Math.abs(a.posX - b.posX) * 2 < (a.width + b.width)) and 
-    (Math.abs(a.posY - b.posY) * 2 < (a.height + b.height))
+collide = (a, b) -> not ((b.posX > a.posX + a.width) or
+                         (b.posX + b.width < a.posX) or
+                         (b.posY > a.posY + a.height) or
+                         (b.posY + b.height < b.posY))
 
 shootLaser = ->
   # create a new laser object
