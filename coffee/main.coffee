@@ -249,7 +249,7 @@ stopGame = ->
 
 updateTitlebar = (spacer="&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;&nbsp;") ->
   titlebar = document.getElementById "title"
-  titlebar.innerHTML = "P.N.S/web #{gameVars.version}#{spacer}Score: #{gameVars.points}#{spacer}Highscore: #{window.localStorage['highscore']}"
+  titlebar.innerHTML = "P.N.S #{gameVars.version}#{spacer}Score: #{gameVars.points}#{spacer}Highscore: #{window.localStorage['highscore']}"
 
 window.onload = init
 
