@@ -9,7 +9,7 @@
  *  @pixeldesu / @s4tori for some graphics
  *  @Jim_Clonk for the game idea
  */
-var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newObject, openTitle, render, shootLaser, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
+var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newObject, newSprite, openTitle, render, shootLaser, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
 
 canvas = null;
 
@@ -25,6 +25,16 @@ newObject = function(x, y, width, height) {
     velY: 0,
     width: width,
     height: height,
+    image: new Image()
+  };
+};
+
+newSprite = function(rows, cols, width, height) {
+  return {
+    width: width,
+    height: height,
+    rows: rows,
+    columns: cols,
     image: new Image()
   };
 };
@@ -62,9 +72,7 @@ statusbar = {
 };
 
 text = {
-  sprites: new Image(),
-  spriteWidth: 27,
-  spriteHeight: 23
+  sprite: newSprite(2, 10, 27, 23)
 };
 
 title = {
@@ -95,7 +103,7 @@ init = function() {
   title.top.image.src = './img/title_top.png';
   title.bottom.image.src = './img/title_bottom.png';
   laser.image.src = './img/laser.png';
-  text.sprites.src = './img/nums.png';
+  text.sprite.image.src = './img/nums.png';
   statusbar.logo.image.src = './img/logo.png';
   statusbar.gradient = ctx.createLinearGradient(0, 0, 0, statusbar.height);
   statusbar.gradient.addColorStop(0, statusbar.colourTop);
@@ -114,18 +122,18 @@ drawNumbers = function(num, pad, posX, posY) {
   _results = [];
   for (_i = 0, _len = numberStr.length; _i < _len; _i++) {
     c = numberStr[_i];
-    spriteX = Number(c) * text.spriteWidth;
-    ctx.drawImage(text.sprites, spriteX, spriteY, text.spriteWidth, text.spriteHeight, posX, posY, text.spriteWidth, text.spriteHeight);
-    _results.push(posX += text.spriteWidth - 5);
+    spriteX = Number(c) * text.sprite.width;
+    ctx.drawImage(text.sprite.image, spriteX, spriteY, text.sprite.width, text.sprite.height, posX, posY, text.sprite.width, text.sprite.height);
+    _results.push(posX += text.sprite.width - 5);
   }
   return _results;
 };
 
-drawSprite = function(x, y, posX, posY) {
+drawSprite = function(spr, x, y, posX, posY) {
   var spriteX, spriteY;
-  spriteX = x * text.spriteWidth;
-  spriteY = y * text.spriteHeight;
-  return ctx.drawImage(text.sprites, spriteX, spriteY, text.spriteWidth, text.spriteHeight, posX, posY, text.spriteWidth, text.spriteHeight);
+  spriteX = x * spr.sprite.width;
+  spriteY = y * spr.sprite.height;
+  return ctx.drawImage(spr.sprite.image, spriteX, spriteY, spr.sprite.width, spr.sprite.height, posX, posY, spr.sprite.width, spr.sprite.height);
 };
 
 render = function() {
@@ -135,13 +143,13 @@ render = function() {
   ctx.fillStyle = statusbar.gradient;
   ctx.fillRect(statusbar.posX, statusbar.posY, statusbar.width, statusbar.height);
   for (i = _i = 0; _i <= 2; i = ++_i) {
-    drawSprite(i, 1, statusbar.width - 12 - (3 * text.spriteWidth) + (i * text.spriteWidth), 0);
+    drawSprite(text, i, 1, statusbar.width - 12 - (3 * text.sprite.width) + (i * text.sprite.width), 0);
   }
-  drawNumbers(gameVars.points, 8, statusbar.width - 10 - (7 * text.spriteWidth), text.spriteHeight + 5);
+  drawNumbers(gameVars.points, 8, statusbar.width - 10 - (7 * text.sprite.width), text.sprite.height + 5);
   for (i = _j = 3; _j <= 6; i = ++_j) {
-    drawSprite(i, 1, statusbar.width - 12 - (14 * text.spriteWidth) + (i * text.spriteWidth), 0);
+    drawSprite(text, i, 1, statusbar.width - 12 - (14 * text.sprite.width) + (i * text.sprite.width), 0);
   }
-  drawNumbers(window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.spriteWidth), text.spriteHeight + 5);
+  drawNumbers(window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.sprite.width), text.sprite.height + 5);
   _ref = laser.objects;
   for (_k = 0, _len = _ref.length; _k < _len; _k++) {
     obj = _ref[_k];

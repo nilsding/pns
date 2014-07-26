@@ -21,6 +21,13 @@ newObject = (x, y, width, height) ->
   height: height
   image: new Image()
 
+newSprite = (rows, cols, width, height) ->
+  width: width
+  height: height
+  rows: rows
+  columns: cols
+  image: new Image()
+
 gameVars =
   version: "0.2"
   isRunning: false
@@ -50,9 +57,7 @@ statusbar =
   logo: newObject(8, 8, 48, 48)
 
 text =
-  sprites: new Image()
-  spriteWidth: 27
-  spriteHeight: 23
+  sprite: newSprite 2, 10, 27, 23
 
 title =
   opened: false
@@ -80,7 +85,7 @@ init = ->
   title.top.image.src = './img/title_top.png'
   title.bottom.image.src = './img/title_bottom.png'
   laser.image.src = './img/laser.png'
-  text.sprites.src = './img/nums.png'
+  text.sprite.image.src = './img/nums.png'
   statusbar.logo.image.src = './img/logo.png'
   
   statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
@@ -102,14 +107,14 @@ drawNumbers = (num, pad, posX, posY) ->
   spriteX = 0
   spriteY = 0
   for c in numberStr
-    spriteX = Number(c) * text.spriteWidth
-    ctx.drawImage text.sprites, spriteX, spriteY, text.spriteWidth, text.spriteHeight, posX, posY, text.spriteWidth, text.spriteHeight
-    posX += text.spriteWidth - 5
+    spriteX = Number(c) * text.sprite.width
+    ctx.drawImage text.sprite.image, spriteX, spriteY, text.sprite.width, text.sprite.height, posX, posY, text.sprite.width, text.sprite.height
+    posX += text.sprite.width - 5
 
-drawSprite = (x, y, posX, posY) ->
-  spriteX = x * text.spriteWidth
-  spriteY = y * text.spriteHeight
-  ctx.drawImage text.sprites, spriteX, spriteY, text.spriteWidth, text.spriteHeight, posX, posY, text.spriteWidth, text.spriteHeight
+drawSprite = (spr, x, y, posX, posY) ->
+  spriteX = x * spr.sprite.width
+  spriteY = y * spr.sprite.height
+  ctx.drawImage spr.sprite.image, spriteX, spriteY, spr.sprite.width, spr.sprite.height, posX, posY, spr.sprite.width, spr.sprite.height
 
 render = ->
   ctx.clearRect 0, 0, gameCanvas.width, gameCanvas.height
@@ -120,13 +125,13 @@ render = ->
   
   # score
   for i in [0..2]
-    drawSprite i, 1, statusbar.width - 12 - (3 * text.spriteWidth) + (i * text.spriteWidth), 0
-  drawNumbers gameVars.points, 8, statusbar.width - 10 - (7 * text.spriteWidth), text.spriteHeight + 5
+    drawSprite text, i, 1, statusbar.width - 12 - (3 * text.sprite.width) + (i * text.sprite.width), 0
+  drawNumbers gameVars.points, 8, statusbar.width - 10 - (7 * text.sprite.width), text.sprite.height + 5
   
   # hiscore
   for i in [3..6]
-    drawSprite i, 1, statusbar.width - 12 - (14 * text.spriteWidth) + (i * text.spriteWidth), 0
-  drawNumbers window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.spriteWidth), text.spriteHeight + 5
+    drawSprite text, i, 1, statusbar.width - 12 - (14 * text.sprite.width) + (i * text.sprite.width), 0
+  drawNumbers window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.sprite.width), text.sprite.height + 5
   
   for obj in laser.objects
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
