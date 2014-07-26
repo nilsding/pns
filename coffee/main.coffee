@@ -14,11 +14,28 @@ newObject = (x, y, width, height) ->
 gameVars =
   isRunning: false
   ticks: 60
+  points: 0
+  lives: 0
 
-gameField =
+gameCanvas =
   width: 800
   height: 600
+
+gameField =
+  posX: 0
+  posY: 64
+  width: gameCanvas.width
+  height: gameCanvas.height - 64
   background: new Image()
+
+statusbar =
+  posX: 0
+  posY: 0
+  width: gameCanvas.width
+  height: gameField.posY
+  gradient: null
+  colourTop: "#555555"
+  colourBottom: "#323232"
 
 title =
   opened: false
@@ -31,16 +48,22 @@ clock = newObject 600, 100, 128, 128
 
 laserImage = new Image()
 laserObjects = []
+laserActive = false
 
 init = ->
   canvas = document.getElementById 'gameField'
   ctx = canvas.getContext '2d'
+
   gameField.background.src = './img/background.png'
   toaster.image.src = './img/toaster.png'
   clock.image.src = './img/clock.png'
   title.top.image.src = './img/title_top.png'
   title.bottom.image.src = './img/title_bottom.png'
   laserImage.src = './img/laser.png'
+  
+  statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
+  statusbar.gradient.addColorStop 0, statusbar.colourTop
+  statusbar.gradient.addColorStop 1, statusbar.colourBottom
   
   #gameControlButton = document.getElementById 'gameControlButton'
   #gameControlButton.innerHTML = "Start Game"
@@ -51,8 +74,11 @@ init = ->
   render()
 
 render = ->
-  #ctx.clearRect(0, 0, gameField.width, gameField.height)
-  ctx.drawImage gameField.background, 0, 0, gameField.width, gameField.height
+  ctx.clearRect 0, 0, gameCanvas.width, gameCanvas.height
+  ctx.drawImage gameField.background, gameField.posX, gameField.posY, gameField.width, gameField.height
+  
+  ctx.fillStyle = statusbar.gradient
+  ctx.fillRect statusbar.posX, statusbar.posY, statusbar.width, statusbar.height
   
   for obj in laserObjects  # draw the laser first
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
@@ -71,7 +97,9 @@ keydownhandler = (event) ->
     switch event.keyCode
       when 32 # space bar  (DER TOTALE LASER)
         event.preventDefault()
-        shootLaser()
+        if not laserActive and laserObjects.length < 5
+          shootLaser()
+          laserActive = true
       when 37 # left
         event.preventDefault()
         toaster.velX = -5
@@ -96,6 +124,8 @@ keyuphandler = (event) ->
     when 38, 40 # up, down
       event.preventDefault()
       toaster.velY = 0
+    when 32 # space bar
+      laserActive = false
 
 collide = (a, b) -> not ((b.posX > a.posX + a.width) or
                          (b.posX + b.width < a.posX) or
@@ -137,9 +167,9 @@ gameLoop = ->
   return unless gameVars.isRunning
   newX = toaster.posX + toaster.velX
   newY = toaster.posY + toaster.velY
-  if newX < gameField.width - toaster.width and newX > 0
+  if newX < gameField.width + gameField.posX - toaster.width and newX > 0 + gameField.posX
     toaster.posX = newX
-  if newY < gameField.height - toaster.height and newY > 0
+  if newY < gameField.height + gameField.posY - toaster.height and newY > 0 + gameField.posY
     toaster.posY = newY
   
   newX = (clock.posX -= 5)
@@ -151,13 +181,15 @@ gameLoop = ->
   for l, i in laserObjects
     continue unless l?
     newX = l.posX + l.velX
-    if newX < gameField.width
+    if newX < gameField.width + gameField.posX
       l.posX = newX
       # collision detection!!!!
       if collide(l, clock)
+        gameVars.points += Math.round(100 / laserObjects.length)
+        console.log gameVars.points
         laserObjects.splice i, 1
         clock.posX = 800
-        clock.posY = Math.floor (Math.random() * 1000) % (600 - clock.height)
+        clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
     else
       laserObjects.splice i, 1
   
