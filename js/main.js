@@ -9,7 +9,7 @@
  *  @pixeldesu / @s4tori for some graphics
  *  @Jim_Clonk for the game idea
  */
-var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laserActive, laserImage, laserObjects, newObject, openTitle, render, shootLaser, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
+var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newObject, openTitle, render, shootLaser, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
 
 canvas = null;
 
@@ -77,11 +77,11 @@ toaster = newObject(25, title.top.height - (188 / 2), 188, 148);
 
 clock = newObject(600, 100, 128, 128);
 
-laserImage = new Image();
-
-laserObjects = [];
-
-laserActive = false;
+laser = {
+  image: new Image(),
+  objects: [],
+  isActive: false
+};
 
 init = function() {
   if (window.localStorage['highscore'] == null) {
@@ -94,7 +94,7 @@ init = function() {
   clock.image.src = './img/clock.png';
   title.top.image.src = './img/title_top.png';
   title.bottom.image.src = './img/title_bottom.png';
-  laserImage.src = './img/laser.png';
+  laser.image.src = './img/laser.png';
   text.sprites.src = './img/nums.png';
   statusbar.logo.image.src = './img/logo.png';
   statusbar.gradient = ctx.createLinearGradient(0, 0, 0, statusbar.height);
@@ -129,7 +129,7 @@ drawSprite = function(x, y, posX, posY) {
 };
 
 render = function() {
-  var i, obj, _i, _j, _k, _l, _len, _len1, _ref;
+  var i, obj, _i, _j, _k, _l, _len, _len1, _ref, _ref1;
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
   ctx.drawImage(gameField.background, gameField.posX, gameField.posY, gameField.width, gameField.height);
   ctx.fillStyle = statusbar.gradient;
@@ -142,13 +142,14 @@ render = function() {
     drawSprite(i, 1, statusbar.width - 12 - (14 * text.spriteWidth) + (i * text.spriteWidth), 0);
   }
   drawNumbers(window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.spriteWidth), text.spriteHeight + 5);
-  for (_k = 0, _len = laserObjects.length; _k < _len; _k++) {
-    obj = laserObjects[_k];
+  _ref = laser.objects;
+  for (_k = 0, _len = _ref.length; _k < _len; _k++) {
+    obj = _ref[_k];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
-  _ref = [clock, toaster, statusbar.logo, title.top, title.bottom];
-  for (_l = 0, _len1 = _ref.length; _l < _len1; _l++) {
-    obj = _ref[_l];
+  _ref1 = [clock, toaster, statusbar.logo, title.top, title.bottom];
+  for (_l = 0, _len1 = _ref1.length; _l < _len1; _l++) {
+    obj = _ref1[_l];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
   return window.requestAnimationFrame(render);
@@ -165,9 +166,9 @@ keydownhandler = function(event) {
     switch (event.keyCode) {
       case 32:
         event.preventDefault();
-        if (!laserActive && laserObjects.length < 5) {
+        if (!laser.isActive && laser.objects.length < 5) {
           shootLaser();
-          return laserActive = true;
+          return laser.isActive = true;
         }
         break;
       case 37:
@@ -204,7 +205,7 @@ keyuphandler = function(event) {
       event.preventDefault();
       return toaster.velY = 0;
     case 32:
-      return laserActive = false;
+      return laser.isActive = false;
   }
 };
 
@@ -213,14 +214,14 @@ collide = function(a, b) {
 };
 
 shootLaser = function() {
-  var laser;
-  laser = newObject(0, 0, 71, 71);
-  laser.image = laserImage;
-  laser.posX = Math.floor(toaster.posX + toaster.width - laser.width);
-  laser.posY = Math.floor(toaster.posY + toaster.height / 2 - laser.height / 2);
-  laser.velX = 5;
-  laser.velY = 0;
-  return laserObjects.push(laser);
+  var _laser;
+  _laser = newObject(0, 0, 71, 71);
+  _laser.image = laser.image;
+  _laser.posX = Math.floor(toaster.posX + toaster.width - _laser.width);
+  _laser.posY = Math.floor(toaster.posY + toaster.height / 2 - _laser.height / 2);
+  _laser.velX = 5;
+  _laser.velY = 0;
+  return laser.objects.push(_laser);
 };
 
 openTitle = function() {
@@ -244,7 +245,7 @@ closeTitle = function() {
 };
 
 gameLoop = function() {
-  var i, l, newX, newY, _i, _len;
+  var i, l, newX, newY, _i, _len, _ref;
   if (!gameVars.isRunning) {
     return;
   }
@@ -261,8 +262,9 @@ gameLoop = function() {
     clock.posX = 800;
     clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
   }
-  for (i = _i = 0, _len = laserObjects.length; _i < _len; i = ++_i) {
-    l = laserObjects[i];
+  _ref = laser.objects;
+  for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+    l = _ref[i];
     if (l == null) {
       continue;
     }
@@ -270,17 +272,17 @@ gameLoop = function() {
     if (newX < gameField.width + gameField.posX) {
       l.posX = newX;
       if (collide(l, clock)) {
-        gameVars.points += Math.round(100 / laserObjects.length);
+        gameVars.points += Math.round(100 / laser.objects.length);
         updateTitlebar();
         if (Number(window.localStorage['highscore']) < gameVars.points) {
           window.localStorage['highscore'] = gameVars.points;
         }
-        laserObjects.splice(i, 1);
+        laser.objects.splice(i, 1);
         clock.posX = 800;
         clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
       }
     } else {
-      laserObjects.splice(i, 1);
+      laser.objects.splice(i, 1);
     }
   }
   return window.setTimeout(gameLoop, 1000 / gameVars.ticks);

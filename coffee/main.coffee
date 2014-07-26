@@ -63,9 +63,10 @@ toaster = newObject 25, title.top.height - (188 / 2), 188, 148
 
 clock = newObject 600, 100, 128, 128
 
-laserImage = new Image()
-laserObjects = []
-laserActive = false
+laser = 
+  image: new Image()
+  objects: []
+  isActive: false
 
 init = ->
   unless window.localStorage['highscore']?
@@ -78,7 +79,7 @@ init = ->
   clock.image.src = './img/clock.png'
   title.top.image.src = './img/title_top.png'
   title.bottom.image.src = './img/title_bottom.png'
-  laserImage.src = './img/laser.png'
+  laser.image.src = './img/laser.png'
   text.sprites.src = './img/nums.png'
   statusbar.logo.image.src = './img/logo.png'
   
@@ -127,7 +128,7 @@ render = ->
     drawSprite i, 1, statusbar.width - 12 - (14 * text.spriteWidth) + (i * text.spriteWidth), 0
   drawNumbers window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.spriteWidth), text.spriteHeight + 5
   
-  for obj in laserObjects
+  for obj in laser.objects
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
   for obj in [clock, toaster, statusbar.logo, title.top, title.bottom]
@@ -145,9 +146,9 @@ keydownhandler = (event) ->
     switch event.keyCode
       when 32 # space bar  (DER TOTALE LASER)
         event.preventDefault()
-        if not laserActive and laserObjects.length < 5
+        if not laser.isActive and laser.objects.length < 5
           shootLaser()
-          laserActive = true
+          laser.isActive = true
       when 37 # left
         event.preventDefault()
         toaster.velX = -5
@@ -174,7 +175,7 @@ keyuphandler = (event) ->
       event.preventDefault()
       toaster.velY = 0
     when 32 # space bar
-      laserActive = false
+      laser.isActive = false
 
 collide = (a, b) -> not ((b.posX > a.posX + a.width) or
                          (b.posX + b.width < a.posX) or
@@ -183,14 +184,14 @@ collide = (a, b) -> not ((b.posX > a.posX + a.width) or
 
 shootLaser = ->
   # create a new laser object
-  laser = newObject 0, 0, 71, 71
-  laser.image = laserImage
+  _laser = newObject 0, 0, 71, 71
+  _laser.image = laser.image
   
-  laser.posX = Math.floor(toaster.posX + toaster.width - laser.width)
-  laser.posY = Math.floor(toaster.posY + toaster.height / 2 - laser.height / 2)
-  laser.velX = 5
-  laser.velY = 0
-  laserObjects.push laser
+  _laser.posX = Math.floor(toaster.posX + toaster.width - _laser.width)
+  _laser.posY = Math.floor(toaster.posY + toaster.height / 2 - _laser.height / 2)
+  _laser.velX = 5
+  _laser.velY = 0
+  laser.objects.push _laser
 
 openTitle = ->
   if title.top.posY < (-title.top.height)
@@ -227,22 +228,22 @@ gameLoop = ->
     clock.posX = 800
     clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
   
-  for l, i in laserObjects
+  for l, i in laser.objects
     continue unless l?
     newX = l.posX + l.velX
     if newX < gameField.width + gameField.posX
       l.posX = newX
       # collision detection!!!!
       if collide(l, clock)
-        gameVars.points += Math.round(100 / laserObjects.length)
+        gameVars.points += Math.round(100 / laser.objects.length)
         updateTitlebar()
         if Number(window.localStorage['highscore']) < gameVars.points
           window.localStorage['highscore'] = gameVars.points
-        laserObjects.splice i, 1
+        laser.objects.splice i, 1
         clock.posX = 800
         clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
     else
-      laserObjects.splice i, 1
+      laser.objects.splice i, 1
   
   window.setTimeout gameLoop, 1000 / gameVars.ticks
 
