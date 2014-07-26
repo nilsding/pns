@@ -46,7 +46,8 @@ statusbar = {
   height: gameField.posY,
   gradient: null,
   colourTop: "#555555",
-  colourBottom: "#323232"
+  colourBottom: "#323232",
+  logo: newObject(8, 8, 48, 48)
 };
 
 texts = {
@@ -82,6 +83,7 @@ init = function() {
   title.bottom.image.src = './img/title_bottom.png';
   laserImage.src = './img/laser.png';
   texts.sprites.src = './img/nums.png';
+  statusbar.logo.image.src = './img/logo.png';
   statusbar.gradient = ctx.createLinearGradient(0, 0, 0, statusbar.height);
   statusbar.gradient.addColorStop(0, statusbar.colourTop);
   statusbar.gradient.addColorStop(1, statusbar.colourBottom);
@@ -126,7 +128,7 @@ render = function() {
     obj = laserObjects[_j];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
-  _ref = [clock, toaster, title.top, title.bottom];
+  _ref = [clock, toaster, statusbar.logo, title.top, title.bottom];
   for (_k = 0, _len1 = _ref.length; _k < _len1; _k++) {
     obj = _ref[_k];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);

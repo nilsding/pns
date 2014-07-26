@@ -36,6 +36,7 @@ statusbar =
   gradient: null
   colourTop: "#555555"
   colourBottom: "#323232"
+  logo: newObject(8, 8, 48, 48)
 
 texts =
   sprites: new Image()
@@ -67,6 +68,7 @@ init = ->
   title.bottom.image.src = './img/title_bottom.png'
   laserImage.src = './img/laser.png'
   texts.sprites.src = './img/nums.png'
+  statusbar.logo.image.src = './img/logo.png'
   
   statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
   statusbar.gradient.addColorStop 0, statusbar.colourTop
@@ -108,7 +110,7 @@ render = ->
   for obj in laserObjects  # draw the laser first
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
-  for obj in [clock, toaster, title.top, title.bottom]    # I'm a lazy fuck.
+  for obj in [clock, toaster, statusbar.logo, title.top, title.bottom]    # I'm a lazy fuck.
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
   window.requestAnimationFrame render
