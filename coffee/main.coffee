@@ -57,6 +57,8 @@ laserObjects = []
 laserActive = false
 
 init = ->
+  unless window.localStorage['highscore']?
+    window.localStorage['highscore'] = 0
   canvas = document.getElementById 'gameField'
   ctx = canvas.getContext '2d'
 
@@ -102,14 +104,20 @@ render = ->
   ctx.fillStyle = statusbar.gradient
   ctx.fillRect statusbar.posX, statusbar.posY, statusbar.width, statusbar.height
   
+  # score
   for i in [0..2]
-    drawSprite i, 1, statusbar.width - 5 - (3 * text.spriteWidth) + (i * text.spriteWidth), 0
-  drawNumbers gameVars.points, 8, statusbar.width - 5 - (7 * text.spriteWidth), text.spriteHeight + 5
+    drawSprite i, 1, statusbar.width - 12 - (3 * text.spriteWidth) + (i * text.spriteWidth), 0
+  drawNumbers gameVars.points, 8, statusbar.width - 10 - (7 * text.spriteWidth), text.spriteHeight + 5
   
-  for obj in laserObjects  # draw the laser first
+  # hiscore
+  for i in [3..6]
+    drawSprite i, 1, statusbar.width - 12 - (14 * text.spriteWidth) + (i * text.spriteWidth), 0
+  drawNumbers window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.spriteWidth), text.spriteHeight + 5
+  
+  for obj in laserObjects
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
-  for obj in [clock, toaster, statusbar.logo, title.top, title.bottom]    # I'm a lazy fuck.
+  for obj in [clock, toaster, statusbar.logo, title.top, title.bottom]
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
   window.requestAnimationFrame render
@@ -212,6 +220,8 @@ gameLoop = ->
       # collision detection!!!!
       if collide(l, clock)
         gameVars.points += Math.round(100 / laserObjects.length)
+        if Number(window.localStorage['highscore']) < gameVars.points
+          window.localStorage['highscore'] = gameVars.points
         laserObjects.splice i, 1
         clock.posX = 800
         clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY

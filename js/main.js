@@ -73,6 +73,9 @@ laserObjects = [];
 laserActive = false;
 
 init = function() {
+  if (window.localStorage['highscore'] == null) {
+    window.localStorage['highscore'] = 0;
+  }
   canvas = document.getElementById('gameField');
   ctx = canvas.getContext('2d');
   gameField.background.src = './img/background.png';
@@ -114,22 +117,26 @@ drawSprite = function(x, y, posX, posY) {
 };
 
 render = function() {
-  var i, obj, _i, _j, _k, _len, _len1, _ref;
+  var i, obj, _i, _j, _k, _l, _len, _len1, _ref;
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
   ctx.drawImage(gameField.background, gameField.posX, gameField.posY, gameField.width, gameField.height);
   ctx.fillStyle = statusbar.gradient;
   ctx.fillRect(statusbar.posX, statusbar.posY, statusbar.width, statusbar.height);
   for (i = _i = 0; _i <= 2; i = ++_i) {
-    drawSprite(i, 1, statusbar.width - 5 - (3 * text.spriteWidth) + (i * text.spriteWidth), 0);
+    drawSprite(i, 1, statusbar.width - 12 - (3 * text.spriteWidth) + (i * text.spriteWidth), 0);
   }
-  drawNumbers(gameVars.points, 8, statusbar.width - 5 - (7 * text.spriteWidth), text.spriteHeight + 5);
-  for (_j = 0, _len = laserObjects.length; _j < _len; _j++) {
-    obj = laserObjects[_j];
+  drawNumbers(gameVars.points, 8, statusbar.width - 10 - (7 * text.spriteWidth), text.spriteHeight + 5);
+  for (i = _j = 3; _j <= 6; i = ++_j) {
+    drawSprite(i, 1, statusbar.width - 12 - (14 * text.spriteWidth) + (i * text.spriteWidth), 0);
+  }
+  drawNumbers(window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.spriteWidth), text.spriteHeight + 5);
+  for (_k = 0, _len = laserObjects.length; _k < _len; _k++) {
+    obj = laserObjects[_k];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
   _ref = [clock, toaster, statusbar.logo, title.top, title.bottom];
-  for (_k = 0, _len1 = _ref.length; _k < _len1; _k++) {
-    obj = _ref[_k];
+  for (_l = 0, _len1 = _ref.length; _l < _len1; _l++) {
+    obj = _ref[_l];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
   return window.requestAnimationFrame(render);
@@ -250,6 +257,9 @@ gameLoop = function() {
       l.posX = newX;
       if (collide(l, clock)) {
         gameVars.points += Math.round(100 / laserObjects.length);
+        if (Number(window.localStorage['highscore']) < gameVars.points) {
+          window.localStorage['highscore'] = gameVars.points;
+        }
         laserObjects.splice(i, 1);
         clock.posX = 800;
         clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
