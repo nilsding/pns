@@ -1,3 +1,13 @@
+###
+# P.N.S
+# A small, but fun game with toasters and clocks.
+# (c) 2011-2014 nilsding
+#
+# Special thanks to:
+#  @pixeldesu / @s4tori for some graphics
+#  @Jim_Clonk for the game idea
+###
+
 canvas = null
 ctx = null
 gameControlButton = null
