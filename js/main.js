@@ -148,6 +148,7 @@ keydownhandler = function(event) {
   if (!gameVars.isRunning) {
     switch (event.keyCode) {
       case 32:
+        document.getElementById('info').style.display = "none";
         return startGame();
     }
   } else {
@@ -173,6 +174,7 @@ keydownhandler = function(event) {
         return toaster.velY = +5;
       case 19:
       case 80:
+        document.getElementById('info').style.display = "";
         return stopGame();
     }
   }
@@ -291,7 +293,7 @@ updateTitlebar = function(spacer) {
     spacer = "&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;&nbsp;";
   }
   titlebar = document.getElementById("title");
-  return titlebar.innerHTML = "P.N.S/web " + gameVars.version + spacer + "Score: " + gameVars.points + spacer + "Highscore: " + window.localStorage['highscore'];
+  return titlebar.innerHTML = "P.N.S " + gameVars.version + spacer + "Score: " + gameVars.points + spacer + "Highscore: " + window.localStorage['highscore'];
 };
 
 window.onload = init;

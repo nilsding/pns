@@ -129,6 +129,7 @@ keydownhandler = (event) ->
   unless gameVars.isRunning
     switch event.keyCode
       when 32 # space bar  (title screen)
+        document.getElementById('info').style.display = "none"
         startGame()
   else
     switch event.keyCode
@@ -150,6 +151,7 @@ keydownhandler = (event) ->
         event.preventDefault()
         toaster.velY = +5
       when 19, 80 # <Pause> and <P> for stopping the game
+        document.getElementById('info').style.display = ""
         stopGame()
 
 keyuphandler = (event) ->
