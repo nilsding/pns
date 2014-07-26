@@ -37,6 +37,12 @@ statusbar =
   colourTop: "#555555"
   colourBottom: "#323232"
 
+texts =
+  sprites: new Image()
+  spriteWidth: 27
+  spriteHeight: 23
+  objects: []
+
 title =
   opened: false
   top: newObject 0, 0, 800, 300
@@ -60,6 +66,7 @@ init = ->
   title.top.image.src = './img/title_top.png'
   title.bottom.image.src = './img/title_bottom.png'
   laserImage.src = './img/laser.png'
+  texts.sprites.src = './img/nums.png'
   
   statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
   statusbar.gradient.addColorStop 0, statusbar.colourTop
@@ -73,12 +80,30 @@ init = ->
   document.onkeyup = keyuphandler
   render()
 
+drawNumbers = (num, pad, posX, posY) ->
+  numberStr = (Array(pad + 1).join("0") + num).substr(-pad, pad)
+  spriteX = 0
+  spriteY = 0
+  for c in numberStr
+    spriteX = Number(c) * texts.spriteWidth
+    ctx.drawImage texts.sprites, spriteX, spriteY, texts.spriteWidth, texts.spriteHeight, posX, posY, texts.spriteWidth, texts.spriteHeight
+    posX += texts.spriteWidth - 5
+
+drawSprite = (x, y, posX, posY) ->
+  spriteX = x * texts.spriteWidth
+  spriteY = y * texts.spriteHeight
+  ctx.drawImage texts.sprites, spriteX, spriteY, texts.spriteWidth, texts.spriteHeight, posX, posY, texts.spriteWidth, texts.spriteHeight
+
 render = ->
   ctx.clearRect 0, 0, gameCanvas.width, gameCanvas.height
   ctx.drawImage gameField.background, gameField.posX, gameField.posY, gameField.width, gameField.height
   
   ctx.fillStyle = statusbar.gradient
   ctx.fillRect statusbar.posX, statusbar.posY, statusbar.width, statusbar.height
+  
+  for i in [0..2]
+    drawSprite i, 1, statusbar.width - 5 - (3 * texts.spriteWidth) + (i * texts.spriteWidth), 0
+  drawNumbers gameVars.points, 8, statusbar.width - 5 - (7 * texts.spriteWidth), texts.spriteHeight + 5
   
   for obj in laserObjects  # draw the laser first
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
@@ -176,7 +201,7 @@ gameLoop = ->
   
   if newX < -200
     clock.posX = 800
-    clock.posY = Math.floor (Math.random() * 1000) % (600 - clock.height)
+    clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
   
   for l, i in laserObjects
     continue unless l?
@@ -186,7 +211,6 @@ gameLoop = ->
       # collision detection!!!!
       if collide(l, clock)
         gameVars.points += Math.round(100 / laserObjects.length)
-        console.log gameVars.points
         laserObjects.splice i, 1
         clock.posX = 800
         clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
