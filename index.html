@@ -5,20 +5,48 @@
     <script src="js/main.js"></script>
     <style>
       div.container {
+      }
+      div.windowFrame {
+        margin: 0 auto;
+        width: 808px;
+        height: 629px;
+        background: url('./img/windowframe.png');
+      }
+      div.windowFrame #icon {
+        position: relative;
+        top: 5px;
+        left: 5px;
+        width: 16px;
+        height: 16px;
+      }
+      div.windowFrame #title {
         text-align: center;
+        position: relative;
+        top: 2px;
+        left: 5px;
+        font-family: sans-serif;
+        color: #fff;
+        text-shadow: 1px 1px 0px #666;
+        font-size: 14px;
       }
       canvas#gameField {
-        margin: 0 auto;
-        border: 2px solid #aaa;
+        position: relative;
+        top: 5px;
+        left: 4px;
+        border: 0px solid #aaa;
         background: #000;
       }
     </style>
   </head>
   <body>
     <div class="container">
-      <canvas id="gameField" width="800" height="600">
-        Your browser does not support the &lt;canvas&gt; tag.
-      </canvas>
+      <div class="windowFrame">
+        <img id="icon" src="img/logo.png" />
+        <span id="title">P.N.S/web</span>
+        <canvas id="gameField" width="800" height="600">
+          Your browser does not support the &lt;canvas&gt; tag.
+        </canvas>
+      </div>
       <noscript>
         Your browser is not Javascript enable or you have turn it off.  Please enable it for better security reasons.
       </noscript>

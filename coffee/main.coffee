@@ -12,6 +12,7 @@ newObject = (x, y, width, height) ->
   image: new Image()
 
 gameVars =
+  version: "0.2"
   isRunning: false
   ticks: 60
   points: 0
@@ -81,6 +82,8 @@ init = ->
   
   document.onkeydown = keydownhandler
   document.onkeyup = keyuphandler
+  
+  updateTitlebar()
   render()
 
 drawNumbers = (num, pad, posX, posY) ->
@@ -220,6 +223,7 @@ gameLoop = ->
       # collision detection!!!!
       if collide(l, clock)
         gameVars.points += Math.round(100 / laserObjects.length)
+        updateTitlebar()
         if Number(window.localStorage['highscore']) < gameVars.points
           window.localStorage['highscore'] = gameVars.points
         laserObjects.splice i, 1
@@ -242,6 +246,10 @@ stopGame = ->
   #gameControlButton.onclick = startGame
   closeTitle()
   gameVars.isRunning = false
+
+updateTitlebar = (spacer="&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;&nbsp;") ->
+  titlebar = document.getElementById "title"
+  titlebar.innerHTML = "P.N.S/web #{gameVars.version}#{spacer}Score: #{gameVars.points}#{spacer}Highscore: #{window.localStorage['highscore']}"
 
 window.onload = init
 
