@@ -38,7 +38,7 @@ newSprite = (rows, cols, width, height) ->
   image: new Image()
 
 gameVars =
-  version: "0.3"
+  version: "0.4"
   isRunning: false
   ticks: 60
   points: 0
@@ -89,9 +89,17 @@ explosion =
   sprite: newSprite 1, 27, 78, 81
   objects: []
 
+sounds =
+  music: new SeamlessLoop()
+  explosion: new Audio()
+  shoot: new Audio()
+
 init = ->
   unless window.localStorage['highscore']?
     window.localStorage['highscore'] = 0
+  unless window.localStorage['musicEnabled']?
+    window.localStorage['musicEnabled'] = true
+  
   canvas = document.getElementById 'gameField'
   ctx = canvas.getContext '2d'
 
@@ -105,6 +113,11 @@ init = ->
   explosion.sprite.image.src = './img/explosion.png'
   sprites.sprite.image.src = './img/sprites.png'
   
+  sounds.music.addUri './snd/music.ogg', 21607, "music"
+  sounds.music.callback ->
+    if window.localStorage['musicEnabled'] == "true"
+      sounds.music.start("music")
+  
   statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
   statusbar.gradient.addColorStop 0, statusbar.colourTop
   statusbar.gradient.addColorStop 1, statusbar.colourBottom
@@ -116,7 +129,7 @@ init = ->
   document.onkeydown = keydownhandler
   document.onkeyup = keyuphandler
   
-  updateTitlebar()
+  resetGame()
   render()
 
 drawNumbers = (num, pad, posX, posY) ->
@@ -176,6 +189,15 @@ render = ->
   window.requestAnimationFrame render
 
 keydownhandler = (event) ->
+  switch event.keyCode
+    when 77 # M (music on/off)
+      if window.localStorage['musicEnabled'] == "true"
+        sounds.music.stop("music")
+        window.localStorage['musicEnabled'] = false
+      else
+        sounds.music.start("music")
+        window.localStorage['musicEnabled'] = true
+  
   unless gameVars.isRunning
     switch event.keyCode
       when 32 # space bar  (title screen)
@@ -307,13 +329,13 @@ gameLoop = ->
   # check whether the game is over
   if gameVars.lives is 0
     stopGame()
+    resetGame()
   
   window.setTimeout gameLoop, 1000 / gameVars.ticks
 
 startGame = ->
-  #gameControlButton.innerHTML = "Stop Game"
-  #gameControlButton.onclick = stopGame
-  resetGame()
+  # nilsding's Professional Pause-Key Service™
+#   resetGame()
   openTitle()
   gameVars.isRunning = true
   gameLoop()

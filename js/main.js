@@ -9,7 +9,7 @@
  *  @pixeldesu / @s4tori for some graphics
  *  @Jim_Clonk for the game idea
  */
-var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, explosion, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newExplosion, newObject, newSprite, openTitle, render, resetGame, shootLaser, sprites, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
+var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, explosion, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newExplosion, newObject, newSprite, openTitle, render, resetGame, shootLaser, sounds, sprites, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
 
 canvas = null;
 
@@ -48,7 +48,7 @@ newSprite = function(rows, cols, width, height) {
 };
 
 gameVars = {
-  version: "0.3",
+  version: "0.4",
   isRunning: false,
   ticks: 60,
   points: 0,
@@ -108,9 +108,18 @@ explosion = {
   objects: []
 };
 
+sounds = {
+  music: new SeamlessLoop(),
+  explosion: new Audio(),
+  shoot: new Audio()
+};
+
 init = function() {
   if (window.localStorage['highscore'] == null) {
     window.localStorage['highscore'] = 0;
+  }
+  if (window.localStorage['musicEnabled'] == null) {
+    window.localStorage['musicEnabled'] = true;
   }
   canvas = document.getElementById('gameField');
   ctx = canvas.getContext('2d');
@@ -123,12 +132,18 @@ init = function() {
   text.sprite.image.src = './img/nums.png';
   explosion.sprite.image.src = './img/explosion.png';
   sprites.sprite.image.src = './img/sprites.png';
+  sounds.music.addUri('./snd/music.ogg', 21607, "music");
+  sounds.music.callback(function() {
+    if (window.localStorage['musicEnabled'] === "true") {
+      return sounds.music.start("music");
+    }
+  });
   statusbar.gradient = ctx.createLinearGradient(0, 0, 0, statusbar.height);
   statusbar.gradient.addColorStop(0, statusbar.colourTop);
   statusbar.gradient.addColorStop(1, statusbar.colourBottom);
   document.onkeydown = keydownhandler;
   document.onkeyup = keyuphandler;
-  updateTitlebar();
+  resetGame();
   return render();
 };
 
@@ -201,6 +216,16 @@ render = function() {
 };
 
 keydownhandler = function(event) {
+  switch (event.keyCode) {
+    case 77:
+      if (window.localStorage['musicEnabled'] === "true") {
+        sounds.music.stop("music");
+        window.localStorage['musicEnabled'] = false;
+      } else {
+        sounds.music.start("music");
+        window.localStorage['musicEnabled'] = true;
+      }
+  }
   if (!gameVars.isRunning) {
     switch (event.keyCode) {
       case 32:
@@ -357,12 +382,12 @@ gameLoop = function() {
   }
   if (gameVars.lives === 0) {
     stopGame();
+    resetGame();
   }
   return window.setTimeout(gameLoop, 1000 / gameVars.ticks);
 };
 
 startGame = function() {
-  resetGame();
   openTitle();
   gameVars.isRunning = true;
   return gameLoop();
