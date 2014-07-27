@@ -48,7 +48,7 @@ newSprite = function(rows, cols, width, height) {
 };
 
 gameVars = {
-  version: "0.2",
+  version: "0.3",
   isRunning: false,
   ticks: 60,
   points: 0,
