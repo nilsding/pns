@@ -111,7 +111,7 @@ explosion = {
 sounds = {
   music: new SeamlessLoop(),
   explosion: new Audio(),
-  shoot: new Audio()
+  laser: new Audio()
 };
 
 init = function() {
@@ -132,6 +132,8 @@ init = function() {
   text.sprite.image.src = './img/nums.png';
   explosion.sprite.image.src = './img/explosion.png';
   sprites.sprite.image.src = './img/sprites.png';
+  sounds.explosion.src = './snd/explosion.ogg';
+  sounds.laser.src = './snd/laser.ogg';
   sounds.music.addUri('./snd/music.ogg', 21607, "music");
   sounds.music.callback(function() {
     if (window.localStorage['musicEnabled'] === "true") {
@@ -291,6 +293,7 @@ shootLaser = function() {
   _laser.posY = Math.floor(toaster.posY + toaster.height / 2 - _laser.height / 2);
   _laser.velX = 5;
   _laser.velY = 0;
+  (new Audio(sounds.laser.src)).play();
   return laser.objects.push(_laser);
 };
 
@@ -300,6 +303,7 @@ newExplosion = function(x, y) {
   _explosion.image = explosion.sprite.image;
   _explosion.sprite.row = 0;
   _explosion.sprite.column = 0;
+  (new Audio(sounds.explosion.src)).play();
   return explosion.objects.push(_explosion);
 };
 
