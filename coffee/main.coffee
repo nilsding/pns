@@ -93,6 +93,7 @@ sounds =
   music: new SeamlessLoop()
   explosion: new Audio()
   laser: new Audio()
+  lifeLost: new Audio()
 
 init = ->
   unless window.localStorage['highscore']?
@@ -115,6 +116,7 @@ init = ->
   
   sounds.explosion.src = './snd/explosion.ogg'
   sounds.laser.src = './snd/laser.ogg'
+  sounds.lifeLost.src = './snd/ouch.ogg'
   sounds.music.addUri './snd/music.ogg', 21607, "music"
   sounds.music.callback ->
     if window.localStorage['musicEnabled'] == "true"
@@ -302,9 +304,10 @@ gameLoop = ->
   
   if newX < -200 or collide toaster, clock
     # TODO: maybe remove some points
-    newExplosion clock.posX, clock.posY
+    newExplosion clock.posX, clock.posY unless newX < -200
     clock.posX = 800
     clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
+    (new Audio(sounds.lifeLost.src)).play()
     gameVars.lives--
   
   for l, i in laser.objects

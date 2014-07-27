@@ -111,7 +111,8 @@ explosion = {
 sounds = {
   music: new SeamlessLoop(),
   explosion: new Audio(),
-  laser: new Audio()
+  laser: new Audio(),
+  lifeLost: new Audio()
 };
 
 init = function() {
@@ -134,6 +135,7 @@ init = function() {
   sprites.sprite.image.src = './img/sprites.png';
   sounds.explosion.src = './snd/explosion.ogg';
   sounds.laser.src = './snd/laser.ogg';
+  sounds.lifeLost.src = './snd/ouch.ogg';
   sounds.music.addUri('./snd/music.ogg', 21607, "music");
   sounds.music.callback(function() {
     if (window.localStorage['musicEnabled'] === "true") {
@@ -342,9 +344,12 @@ gameLoop = function() {
   }
   newX = (clock.posX -= 5);
   if (newX < -200 || collide(toaster, clock)) {
-    newExplosion(clock.posX, clock.posY);
+    if (!(newX < -200)) {
+      newExplosion(clock.posX, clock.posY);
+    }
     clock.posX = 800;
     clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
+    (new Audio(sounds.lifeLost.src)).play();
     gameVars.lives--;
   }
   _ref = laser.objects;
