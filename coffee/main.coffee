@@ -20,6 +20,15 @@ newObject = (x, y, width, height) ->
   width: width
   height: height
   image: new Image()
+  # if the object needs clipping (such as sprites), these variables can be used:
+  sX: 0
+  sY: 0
+  sWidth: width
+  sHeight: height
+  # additional keys for sprites:
+  sprite:
+    row: 0
+    column: 0
 
 newSprite = (rows, cols, width, height) ->
   width: width
@@ -73,6 +82,10 @@ laser =
   objects: []
   isActive: false
 
+explosion =
+  sprite: newSprite 1, 27, 78, 81
+  objects: []
+
 init = ->
   unless window.localStorage['highscore']?
     window.localStorage['highscore'] = 0
@@ -86,6 +99,7 @@ init = ->
   title.bottom.image.src = './img/title_bottom.png'
   laser.image.src = './img/laser.png'
   text.sprite.image.src = './img/nums.png'
+  explosion.sprite.image.src = './img/explosion.png'
   statusbar.logo.image.src = './img/logo.png'
   
   statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
@@ -132,6 +146,9 @@ render = ->
   for i in [3..6]
     drawSprite text, i, 1, statusbar.width - 12 - (14 * text.sprite.width) + (i * text.sprite.width), 0
   drawNumbers window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.sprite.width), text.sprite.height + 5
+  
+  for obj in explosion.objects
+    ctx.drawImage obj.image, obj.sX, obj.sY, obj.sWidth, obj.sHeight, obj.posX, obj.posY, obj.width, obj.height
   
   for obj in laser.objects
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
@@ -198,6 +215,14 @@ shootLaser = ->
   _laser.velY = 0
   laser.objects.push _laser
 
+newExplosion = (x, y) ->
+  _explosion = newObject x, y, explosion.sprite.width, explosion.sprite.height
+  _explosion.image = explosion.sprite.image
+  _explosion.sprite.row = 0
+  _explosion.sprite.column = 0
+  
+  explosion.objects.push _explosion
+
 openTitle = ->
   if title.top.posY < (-title.top.height)
     title.opened = true
@@ -245,10 +270,19 @@ gameLoop = ->
         if Number(window.localStorage['highscore']) < gameVars.points
           window.localStorage['highscore'] = gameVars.points
         laser.objects.splice i, 1
+        newExplosion clock.posX, clock.posY
         clock.posX = 800
         clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
     else
       laser.objects.splice i, 1
+  
+  for e, i in explosion.objects
+    continue unless e?
+    unless e.sprite.column is explosion.sprite.columns
+      e.sprite.column++
+      e.sX = e.sprite.column * explosion.sprite.width
+    else
+      explosion.objects.splice i, 1
   
   window.setTimeout gameLoop, 1000 / gameVars.ticks
 

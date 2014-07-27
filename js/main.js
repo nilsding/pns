@@ -9,7 +9,7 @@
  *  @pixeldesu / @s4tori for some graphics
  *  @Jim_Clonk for the game idea
  */
-var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newObject, newSprite, openTitle, render, shootLaser, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
+var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, explosion, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newExplosion, newObject, newSprite, openTitle, render, shootLaser, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
 
 canvas = null;
 
@@ -25,7 +25,15 @@ newObject = function(x, y, width, height) {
     velY: 0,
     width: width,
     height: height,
-    image: new Image()
+    image: new Image(),
+    sX: 0,
+    sY: 0,
+    sWidth: width,
+    sHeight: height,
+    sprite: {
+      row: 0,
+      column: 0
+    }
   };
 };
 
@@ -91,6 +99,11 @@ laser = {
   isActive: false
 };
 
+explosion = {
+  sprite: newSprite(1, 27, 78, 81),
+  objects: []
+};
+
 init = function() {
   if (window.localStorage['highscore'] == null) {
     window.localStorage['highscore'] = 0;
@@ -104,6 +117,7 @@ init = function() {
   title.bottom.image.src = './img/title_bottom.png';
   laser.image.src = './img/laser.png';
   text.sprite.image.src = './img/nums.png';
+  explosion.sprite.image.src = './img/explosion.png';
   statusbar.logo.image.src = './img/logo.png';
   statusbar.gradient = ctx.createLinearGradient(0, 0, 0, statusbar.height);
   statusbar.gradient.addColorStop(0, statusbar.colourTop);
@@ -137,7 +151,7 @@ drawSprite = function(spr, x, y, posX, posY) {
 };
 
 render = function() {
-  var i, obj, _i, _j, _k, _l, _len, _len1, _ref, _ref1;
+  var i, obj, _i, _j, _k, _l, _len, _len1, _len2, _m, _ref, _ref1, _ref2;
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
   ctx.drawImage(gameField.background, gameField.posX, gameField.posY, gameField.width, gameField.height);
   ctx.fillStyle = statusbar.gradient;
@@ -150,14 +164,19 @@ render = function() {
     drawSprite(text, i, 1, statusbar.width - 12 - (14 * text.sprite.width) + (i * text.sprite.width), 0);
   }
   drawNumbers(window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.sprite.width), text.sprite.height + 5);
-  _ref = laser.objects;
+  _ref = explosion.objects;
   for (_k = 0, _len = _ref.length; _k < _len; _k++) {
     obj = _ref[_k];
-    ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
+    ctx.drawImage(obj.image, obj.sX, obj.sY, obj.sWidth, obj.sHeight, obj.posX, obj.posY, obj.width, obj.height);
   }
-  _ref1 = [clock, toaster, statusbar.logo, title.top, title.bottom];
+  _ref1 = laser.objects;
   for (_l = 0, _len1 = _ref1.length; _l < _len1; _l++) {
     obj = _ref1[_l];
+    ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
+  }
+  _ref2 = [clock, toaster, statusbar.logo, title.top, title.bottom];
+  for (_m = 0, _len2 = _ref2.length; _m < _len2; _m++) {
+    obj = _ref2[_m];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
   return window.requestAnimationFrame(render);
@@ -232,6 +251,15 @@ shootLaser = function() {
   return laser.objects.push(_laser);
 };
 
+newExplosion = function(x, y) {
+  var _explosion;
+  _explosion = newObject(x, y, explosion.sprite.width, explosion.sprite.height);
+  _explosion.image = explosion.sprite.image;
+  _explosion.sprite.row = 0;
+  _explosion.sprite.column = 0;
+  return explosion.objects.push(_explosion);
+};
+
 openTitle = function() {
   if (title.top.posY < (-title.top.height)) {
     title.opened = true;
@@ -253,7 +281,7 @@ closeTitle = function() {
 };
 
 gameLoop = function() {
-  var i, l, newX, newY, _i, _len, _ref;
+  var e, i, l, newX, newY, _i, _j, _len, _len1, _ref, _ref1;
   if (!gameVars.isRunning) {
     return;
   }
@@ -286,11 +314,25 @@ gameLoop = function() {
           window.localStorage['highscore'] = gameVars.points;
         }
         laser.objects.splice(i, 1);
+        newExplosion(clock.posX, clock.posY);
         clock.posX = 800;
         clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
       }
     } else {
       laser.objects.splice(i, 1);
+    }
+  }
+  _ref1 = explosion.objects;
+  for (i = _j = 0, _len1 = _ref1.length; _j < _len1; i = ++_j) {
+    e = _ref1[i];
+    if (e == null) {
+      continue;
+    }
+    if (e.sprite.column !== explosion.sprite.columns) {
+      e.sprite.column++;
+      e.sX = e.sprite.column * explosion.sprite.width;
+    } else {
+      explosion.objects.splice(i, 1);
     }
   }
   return window.setTimeout(gameLoop, 1000 / gameVars.ticks);
