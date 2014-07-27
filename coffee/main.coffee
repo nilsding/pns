@@ -42,7 +42,8 @@ gameVars =
   isRunning: false
   ticks: 60
   points: 0
-  lives: 0
+  lives: 5
+  maxLives: 5
 
 gameCanvas =
   width: 800
@@ -63,7 +64,9 @@ statusbar =
   gradient: null
   colourTop: "#555555"
   colourBottom: "#323232"
-  logo: newObject(8, 8, 48, 48)
+  
+sprites =
+  sprite: newSprite 8, 8, 32, 32
 
 text =
   sprite: newSprite 2, 10, 27, 23
@@ -100,7 +103,7 @@ init = ->
   laser.image.src = './img/laser.png'
   text.sprite.image.src = './img/nums.png'
   explosion.sprite.image.src = './img/explosion.png'
-  statusbar.logo.image.src = './img/logo.png'
+  sprites.sprite.image.src = './img/sprites.png'
   
   statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
   statusbar.gradient.addColorStop 0, statusbar.colourTop
@@ -137,6 +140,10 @@ render = ->
   ctx.fillStyle = statusbar.gradient
   ctx.fillRect statusbar.posX, statusbar.posY, statusbar.width, statusbar.height
   
+  for i in [0..1]
+    for j in [1..2]
+      drawSprite sprites, i, j, i * sprites.sprite.width, (j - 1) * sprites.sprite.height
+  
   # score
   for i in [0..2]
     drawSprite text, i, 1, statusbar.width - 12 - (3 * text.sprite.width) + (i * text.sprite.width), 0
@@ -147,13 +154,23 @@ render = ->
     drawSprite text, i, 1, statusbar.width - 12 - (14 * text.sprite.width) + (i * text.sprite.width), 0
   drawNumbers window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.sprite.width), text.sprite.height + 5
   
+  # lives
+  for i in [7..9]
+    drawSprite text, i, 1, statusbar.width - 12 - (25 * text.sprite.width) + (i * text.sprite.width), 0
+  
+  for i in [0...gameVars.maxLives]
+    drawSprite sprites, 1, 0, statusbar.width - 12 - (18 * sprites.sprite.width) + (i * (sprites.sprite.width + 3)), text.sprite.height + 5
+  
+  for i in [0...gameVars.lives]
+    drawSprite sprites, 0, 0, statusbar.width - 12 - (18 * sprites.sprite.width) + (i * (sprites.sprite.width + 3)), text.sprite.height + 5
+  
   for obj in explosion.objects
     ctx.drawImage obj.image, obj.sX, obj.sY, obj.sWidth, obj.sHeight, obj.posX, obj.posY, obj.width, obj.height
   
   for obj in laser.objects
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
-  for obj in [clock, toaster, statusbar.logo, title.top, title.bottom]
+  for obj in [clock, toaster, title.top, title.bottom]
     ctx.drawImage obj.image, obj.posX, obj.posY, obj.width, obj.height
   
   window.requestAnimationFrame render
@@ -254,9 +271,12 @@ gameLoop = ->
   
   newX = (clock.posX -= 5)
   
-  if newX < -200
+  if newX < -200 or collide toaster, clock
+    # maybe remove some points
+    newExplosion clock.posX, clock.posY
     clock.posX = 800
     clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
+    gameVars.lives--
   
   for l, i in laser.objects
     continue unless l?
@@ -283,12 +303,17 @@ gameLoop = ->
       e.sX = e.sprite.column * explosion.sprite.width
     else
       explosion.objects.splice i, 1
+      
+  # check whether the game is over
+  if gameVars.lives is 0
+    stopGame()
   
   window.setTimeout gameLoop, 1000 / gameVars.ticks
 
 startGame = ->
   #gameControlButton.innerHTML = "Stop Game"
   #gameControlButton.onclick = stopGame
+  resetGame()
   openTitle()
   gameVars.isRunning = true
   gameLoop()
@@ -298,6 +323,19 @@ stopGame = ->
   #gameControlButton.onclick = startGame
   closeTitle()
   gameVars.isRunning = false
+
+resetGame = ->
+  gameVars.points = 0
+  gameVars.lives = gameVars.maxLives
+  toaster.velX = 0
+  toaster.velY = 0
+  toaster.posX = 25
+  toaster.posY = title.top.height - (188 / 2)
+  clock.posX = 600
+  clock.posY = 100
+  laser.objects = []
+  explosion.objects = []
+  updateTitlebar()
 
 updateTitlebar = (spacer="&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;&nbsp;") ->
   titlebar = document.getElementById "title"

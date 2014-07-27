@@ -9,7 +9,7 @@
  *  @pixeldesu / @s4tori for some graphics
  *  @Jim_Clonk for the game idea
  */
-var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, explosion, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newExplosion, newObject, newSprite, openTitle, render, shootLaser, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
+var canvas, clock, closeTitle, collide, ctx, drawNumbers, drawSprite, explosion, gameCanvas, gameControlButton, gameField, gameLoop, gameVars, init, keydownhandler, keyuphandler, laser, newExplosion, newObject, newSprite, openTitle, render, resetGame, shootLaser, sprites, startGame, statusbar, stopGame, text, title, toaster, updateTitlebar;
 
 canvas = null;
 
@@ -52,7 +52,8 @@ gameVars = {
   isRunning: false,
   ticks: 60,
   points: 0,
-  lives: 0
+  lives: 5,
+  maxLives: 5
 };
 
 gameCanvas = {
@@ -75,8 +76,11 @@ statusbar = {
   height: gameField.posY,
   gradient: null,
   colourTop: "#555555",
-  colourBottom: "#323232",
-  logo: newObject(8, 8, 48, 48)
+  colourBottom: "#323232"
+};
+
+sprites = {
+  sprite: newSprite(8, 8, 32, 32)
 };
 
 text = {
@@ -118,7 +122,7 @@ init = function() {
   laser.image.src = './img/laser.png';
   text.sprite.image.src = './img/nums.png';
   explosion.sprite.image.src = './img/explosion.png';
-  statusbar.logo.image.src = './img/logo.png';
+  sprites.sprite.image.src = './img/sprites.png';
   statusbar.gradient = ctx.createLinearGradient(0, 0, 0, statusbar.height);
   statusbar.gradient.addColorStop(0, statusbar.colourTop);
   statusbar.gradient.addColorStop(1, statusbar.colourBottom);
@@ -151,32 +155,46 @@ drawSprite = function(spr, x, y, posX, posY) {
 };
 
 render = function() {
-  var i, obj, _i, _j, _k, _l, _len, _len1, _len2, _m, _ref, _ref1, _ref2;
+  var i, j, obj, _i, _j, _k, _l, _len, _len1, _len2, _m, _n, _o, _p, _q, _r, _ref, _ref1, _ref2, _ref3, _ref4;
   ctx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
   ctx.drawImage(gameField.background, gameField.posX, gameField.posY, gameField.width, gameField.height);
   ctx.fillStyle = statusbar.gradient;
   ctx.fillRect(statusbar.posX, statusbar.posY, statusbar.width, statusbar.height);
-  for (i = _i = 0; _i <= 2; i = ++_i) {
+  for (i = _i = 0; _i <= 1; i = ++_i) {
+    for (j = _j = 1; _j <= 2; j = ++_j) {
+      drawSprite(sprites, i, j, i * sprites.sprite.width, (j - 1) * sprites.sprite.height);
+    }
+  }
+  for (i = _k = 0; _k <= 2; i = ++_k) {
     drawSprite(text, i, 1, statusbar.width - 12 - (3 * text.sprite.width) + (i * text.sprite.width), 0);
   }
   drawNumbers(gameVars.points, 8, statusbar.width - 10 - (7 * text.sprite.width), text.sprite.height + 5);
-  for (i = _j = 3; _j <= 6; i = ++_j) {
+  for (i = _l = 3; _l <= 6; i = ++_l) {
     drawSprite(text, i, 1, statusbar.width - 12 - (14 * text.sprite.width) + (i * text.sprite.width), 0);
   }
   drawNumbers(window.localStorage['highscore'], 8, statusbar.width - 10 - (14 * text.sprite.width), text.sprite.height + 5);
-  _ref = explosion.objects;
-  for (_k = 0, _len = _ref.length; _k < _len; _k++) {
-    obj = _ref[_k];
+  for (i = _m = 7; _m <= 9; i = ++_m) {
+    drawSprite(text, i, 1, statusbar.width - 12 - (25 * text.sprite.width) + (i * text.sprite.width), 0);
+  }
+  for (i = _n = 0, _ref = gameVars.maxLives; 0 <= _ref ? _n < _ref : _n > _ref; i = 0 <= _ref ? ++_n : --_n) {
+    drawSprite(sprites, 1, 0, statusbar.width - 12 - (18 * sprites.sprite.width) + (i * (sprites.sprite.width + 3)), text.sprite.height + 5);
+  }
+  for (i = _o = 0, _ref1 = gameVars.lives; 0 <= _ref1 ? _o < _ref1 : _o > _ref1; i = 0 <= _ref1 ? ++_o : --_o) {
+    drawSprite(sprites, 0, 0, statusbar.width - 12 - (18 * sprites.sprite.width) + (i * (sprites.sprite.width + 3)), text.sprite.height + 5);
+  }
+  _ref2 = explosion.objects;
+  for (_p = 0, _len = _ref2.length; _p < _len; _p++) {
+    obj = _ref2[_p];
     ctx.drawImage(obj.image, obj.sX, obj.sY, obj.sWidth, obj.sHeight, obj.posX, obj.posY, obj.width, obj.height);
   }
-  _ref1 = laser.objects;
-  for (_l = 0, _len1 = _ref1.length; _l < _len1; _l++) {
-    obj = _ref1[_l];
+  _ref3 = laser.objects;
+  for (_q = 0, _len1 = _ref3.length; _q < _len1; _q++) {
+    obj = _ref3[_q];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
-  _ref2 = [clock, toaster, statusbar.logo, title.top, title.bottom];
-  for (_m = 0, _len2 = _ref2.length; _m < _len2; _m++) {
-    obj = _ref2[_m];
+  _ref4 = [clock, toaster, title.top, title.bottom];
+  for (_r = 0, _len2 = _ref4.length; _r < _len2; _r++) {
+    obj = _ref4[_r];
     ctx.drawImage(obj.image, obj.posX, obj.posY, obj.width, obj.height);
   }
   return window.requestAnimationFrame(render);
@@ -294,9 +312,11 @@ gameLoop = function() {
     toaster.posY = newY;
   }
   newX = (clock.posX -= 5);
-  if (newX < -200) {
+  if (newX < -200 || collide(toaster, clock)) {
+    newExplosion(clock.posX, clock.posY);
     clock.posX = 800;
     clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
+    gameVars.lives--;
   }
   _ref = laser.objects;
   for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
@@ -335,10 +355,14 @@ gameLoop = function() {
       explosion.objects.splice(i, 1);
     }
   }
+  if (gameVars.lives === 0) {
+    stopGame();
+  }
   return window.setTimeout(gameLoop, 1000 / gameVars.ticks);
 };
 
 startGame = function() {
+  resetGame();
   openTitle();
   gameVars.isRunning = true;
   return gameLoop();
@@ -347,6 +371,20 @@ startGame = function() {
 stopGame = function() {
   closeTitle();
   return gameVars.isRunning = false;
+};
+
+resetGame = function() {
+  gameVars.points = 0;
+  gameVars.lives = gameVars.maxLives;
+  toaster.velX = 0;
+  toaster.velY = 0;
+  toaster.posX = 25;
+  toaster.posY = title.top.height - (188 / 2);
+  clock.posX = 600;
+  clock.posY = 100;
+  laser.objects = [];
+  explosion.objects = [];
+  return updateTitlebar();
 };
 
 updateTitlebar = function(spacer) {
