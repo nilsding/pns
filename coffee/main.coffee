@@ -99,6 +99,8 @@ sounds =
   laser: new Audio()
   lifeLost: new Audio()
 
+##
+# Initializes the game.
 init = ->
   unless window.localStorage['highscore']?
     window.localStorage['highscore'] = 0
@@ -136,6 +138,8 @@ init = ->
   resetGame()
   render()
 
+##
+# Draws a number on the screen.
 drawNumbers = (num, pad, posX, posY) ->
   numberStr = (Array(pad + 1).join("0") + num).substr(-pad, pad)
   spriteX = 0
@@ -145,11 +149,15 @@ drawNumbers = (num, pad, posX, posY) ->
     ctx.drawImage text.sprite.image, spriteX, spriteY, text.sprite.width, text.sprite.height, posX, posY, text.sprite.width, text.sprite.height
     posX += text.sprite.width - 5
 
+##
+# Draws a sprite on the screen.
 drawSprite = (spr, x, y, posX, posY) ->
   spriteX = x * spr.sprite.width
   spriteY = y * spr.sprite.height
   ctx.drawImage spr.sprite.image, spriteX, spriteY, spr.sprite.width, spr.sprite.height, posX, posY, spr.sprite.width, spr.sprite.height
 
+##
+# Renders a frame.
 render = ->
   ctx.clearRect 0, 0, gameCanvas.width, gameCanvas.height
   ctx.drawImage gameField.background, gameField.posX, gameField.posY, gameField.width, gameField.height
@@ -192,6 +200,8 @@ render = ->
   
   window.requestAnimationFrame render
 
+##
+# keyDown handler.
 keydownhandler = (event) ->
   switch event.keyCode
     when 77 # M (music on/off)
@@ -230,6 +240,8 @@ keydownhandler = (event) ->
         document.getElementById('info').style.display = ""
         stopGame()
 
+##
+# keyUp handler.
 keyuphandler = (event) ->
   return unless gameVars.isRunning
   switch event.keyCode
@@ -242,13 +254,16 @@ keyuphandler = (event) ->
     when 32 # space bar
       laser.isActive = false
 
+##
+# Simple collision detection.
 collide = (a, b) -> not ((b.posX > a.posX + a.width) or
                          (b.posX + b.width < a.posX) or
                          (b.posY > a.posY + a.height) or
                          (b.posY + b.height < a.posY))
 
+##
+# Shoots a laser ray.  Pew pew pew.
 shootLaser = ->
-  # create a new laser object
   _laser = newObject 0, 0, 71, 71
   _laser.image = laser.image
   
@@ -261,6 +276,8 @@ shootLaser = ->
   
   laser.objects.push _laser
 
+##
+# Generates a new explosion.
 newExplosion = (x, y) ->
   _explosion = newObject x, y, explosion.sprite.width, explosion.sprite.height
   _explosion.image = explosion.sprite.image
@@ -271,6 +288,8 @@ newExplosion = (x, y) ->
   
   explosion.objects.push _explosion
 
+##
+# Hides the title screen.
 openTitle = ->
   if title.top.posY < (-title.top.height)
     title.opened = true
@@ -281,6 +300,8 @@ openTitle = ->
 
   window.setTimeout openTitle, 1000 / gameVars.ticks
 
+##
+# Shows the title screen.
 closeTitle = ->
   if title.top.posY is 0
     title.opened = false
@@ -291,6 +312,8 @@ closeTitle = ->
 
   window.setTimeout closeTitle, 1000 / gameVars.ticks
 
+##
+# Main game loop.
 gameLoop = ->
   return unless gameVars.isRunning
   newX = toaster.posX + toaster.velX
@@ -342,6 +365,8 @@ gameLoop = ->
   
   window.setTimeout gameLoop, 1000 / gameVars.ticks
 
+##
+# Starts the game.  (You lost, by the way)
 startGame = ->
   # nilsding's Professional Pause-Key Service™
   #resetGame()
@@ -349,10 +374,14 @@ startGame = ->
   gameVars.isRunning = true
   gameLoop()
 
+##
+# Stops the game and shows the title screen.
 stopGame = ->
   closeTitle()
   gameVars.isRunning = false
 
+##
+# Resets the game to its initial values
 resetGame = ->
   gameVars.points = 0
   gameVars.lives = gameVars.maxLives
