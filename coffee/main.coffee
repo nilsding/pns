@@ -12,6 +12,8 @@ canvas = null
 ctx = null
 gameControlButton = null
 
+##
+# Generates a new object
 newObject = (x, y, width, height) ->
   posX: x
   posY: y
@@ -30,6 +32,8 @@ newObject = (x, y, width, height) ->
     row: 0
     column: 0
 
+##
+# Generates something.
 newSprite = (rows, cols, width, height) ->
   width: width
   height: height
@@ -73,8 +77,8 @@ text =
 
 title =
   opened: false
-  top: newObject 0, 0, 800, 300
-  bottom: newObject 0, 300, 800, 300
+  top: newObject 0, 0, gameCanvas.width, gameCanvas.height / 2
+  bottom: newObject 0, gameCanvas.height / 2, gameCanvas.width, gameCanvas.height / 2
 
 toaster = newObject 25, title.top.height - (188 / 2), 188, 148
 
@@ -125,10 +129,6 @@ init = ->
   statusbar.gradient = ctx.createLinearGradient 0, 0, 0, statusbar.height
   statusbar.gradient.addColorStop 0, statusbar.colourTop
   statusbar.gradient.addColorStop 1, statusbar.colourBottom
-  
-  #gameControlButton = document.getElementById 'gameControlButton'
-  #gameControlButton.innerHTML = "Start Game"
-  #gameControlButton.onclick = startGame
   
   document.onkeydown = keydownhandler
   document.onkeyup = keyuphandler
@@ -305,7 +305,7 @@ gameLoop = ->
   if newX < -200 or collide toaster, clock
     # TODO: maybe remove some points
     newExplosion clock.posX, clock.posY unless newX < -200
-    clock.posX = 800
+    clock.posX = gameCanvas.width
     clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
     (new Audio(sounds.lifeLost.src)).play()
     gameVars.lives--
@@ -322,7 +322,7 @@ gameLoop = ->
           window.localStorage['highscore'] = gameVars.points
         laser.objects.splice i, 1
         newExplosion clock.posX, clock.posY
-        clock.posX = 800
+        clock.posX = gameCanvas.width
         clock.posY = Math.floor (Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY
     else
       laser.objects.splice i, 1
@@ -366,9 +366,12 @@ resetGame = ->
   explosion.objects = []
   updateTitlebar()
 
+##
+# Updates the contents of the (decorative) title bar.  It also sets the <title> tag.
 updateTitlebar = (spacer="&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;&nbsp;") ->
+  titleText = "P.N.S #{gameVars.version}#{spacer}Score: #{gameVars.points}#{spacer}Highscore: #{window.localStorage['highscore']}"
   titlebar = document.getElementById "title"
-  titlebar.innerHTML = "P.N.S #{gameVars.version}#{spacer}Score: #{gameVars.points}#{spacer}Highscore: #{window.localStorage['highscore']}"
+  titlebar.innerHTML = document.getElementsByTagName("title")[0].innerHTML = titleText
 
 window.onload = init
 

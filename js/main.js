@@ -89,8 +89,8 @@ text = {
 
 title = {
   opened: false,
-  top: newObject(0, 0, 800, 300),
-  bottom: newObject(0, 300, 800, 300)
+  top: newObject(0, 0, gameCanvas.width, gameCanvas.height / 2),
+  bottom: newObject(0, gameCanvas.height / 2, gameCanvas.width, gameCanvas.height / 2)
 };
 
 toaster = newObject(25, title.top.height - (188 / 2), 188, 148);
@@ -347,7 +347,7 @@ gameLoop = function() {
     if (!(newX < -200)) {
       newExplosion(clock.posX, clock.posY);
     }
-    clock.posX = 800;
+    clock.posX = gameCanvas.width;
     clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
     (new Audio(sounds.lifeLost.src)).play();
     gameVars.lives--;
@@ -369,7 +369,7 @@ gameLoop = function() {
         }
         laser.objects.splice(i, 1);
         newExplosion(clock.posX, clock.posY);
-        clock.posX = 800;
+        clock.posX = gameCanvas.width;
         clock.posY = Math.floor((Math.random() * 1000) % (gameField.height - clock.height) + gameField.posY);
       }
     } else {
@@ -422,12 +422,13 @@ resetGame = function() {
 };
 
 updateTitlebar = function(spacer) {
-  var titlebar;
+  var titleText, titlebar;
   if (spacer == null) {
     spacer = "&nbsp;&nbsp;&nbsp;||&nbsp;&nbsp;&nbsp;";
   }
+  titleText = "P.N.S " + gameVars.version + spacer + "Score: " + gameVars.points + spacer + "Highscore: " + window.localStorage['highscore'];
   titlebar = document.getElementById("title");
-  return titlebar.innerHTML = "P.N.S " + gameVars.version + spacer + "Score: " + gameVars.points + spacer + "Highscore: " + window.localStorage['highscore'];
+  return titlebar.innerHTML = document.getElementsByTagName("title")[0].innerHTML = titleText;
 };
 
 window.onload = init;
